@@ -12,11 +12,17 @@ class TodoListViewController: UITableViewController {
     
     var itemArray = ["Test1" ,"Test2" , "Test3"]
     
+    let defaults = UserDefaults.standard // to make app default and std
+    
     
 
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
+        
+        if let items = defaults.array(forKey: "TodoListArray") as? [String] {
+            itemArray = items
+        }
     }
 
     override func didReceiveMemoryWarning() {
@@ -71,6 +77,9 @@ class TodoListViewController: UITableViewController {
             // button click action
            // print(textField.text)
             self.itemArray.append(textField.text!)
+            
+            self.defaults.set(self.itemArray, forKey: "TodoListArray")
+            
             self.tableView.reloadData() // to show current added data to tableview grid - device
         }
         
