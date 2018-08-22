@@ -13,15 +13,29 @@ class TodoListViewController: UITableViewController {
    // var itemArray = ["Test1" ,"Test2" , "Test3"]
     var itemArray  = [Item]()
     
+    let dataPath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first?.appendingPathComponent("Items.plist")
+    
+    
+    
     let defaults = UserDefaults.standard // to make app default and std
     
     
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+    
         // Do any additional setup after loading the view, typically from a nib.
         
-        let newItem = Item()
+        // datastore path singleton object - important
+        /*let dataPath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first?.appendingPathComponent("Items.plist")
+        print(dataPath)*/
+        
+       // print(dataPath)
+        
+        
+        
+        /*let newItem = Item()
         newItem.title = "Test1"
         //newItem.done  = true
         itemArray.append(newItem)
@@ -32,12 +46,16 @@ class TodoListViewController: UITableViewController {
         
         let newItem3 = Item()
         newItem3.title = "Test3"
-         itemArray.append(newItem3)
+         itemArray.append(newItem3)*/
+        
+        //used   loadItems()  for this purpose
         
         
-        if let items = defaults.array(forKey: "TodoListArray") as? [Item] {
-            itemArray = items
-        }
+       // if let items = defaults.array(forKey: "TodoListArray") as? [Item] {
+         //   itemArray = items
+        //}
+        
+        loadItems()
         
         
     }
@@ -94,7 +112,9 @@ class TodoListViewController: UITableViewController {
         }else {
             itemArray[indexPath.row].done = false
         }*/
-        tableView.reloadData() // app run time checkmark not come properly to fix this add reloadData()
+        //tableView.reloadData() // app run time checkmark not come properly to fix this add reloadData()
+        
+        saveItems() // it consist tableView.reloadData()
         
         /*if tableView.cellForRow(at: indexPath)?.accessoryType == .checkmark {
             tableView.cellForRow(at: indexPath)?.accessoryType = .none
@@ -121,19 +141,22 @@ class TodoListViewController: UITableViewController {
         
         let action = UIAlertAction(title: "Add Item", style: .default) { (action) in
             // button click action
-           // print(textField.text)
+          
             
             
             let newItem = Item()
             newItem.title = textField.text!
-            
-            
-            
             self.itemArray.append(newItem)
             
-            self.defaults.set(self.itemArray, forKey: "TodoListArray")
             
-            self.tableView.reloadData() // to show current added data to tableview grid - device
+            self.saveItems()
+            
+            
+            
+            
+           // self.defaults.set(self.itemArray, forKey: "TodoListArray")
+            
+           // to show current added data to tableview grid - device
         }
         
         
@@ -146,5 +169,43 @@ class TodoListViewController: UITableViewController {
         alert.addAction(action)
         present(alert, animated: true, completion: nil)
     }
+    
+    func saveItems() {
+        let encoder = PropertyListEncoder()
+        
+        do
+        {
+            let data = try encoder.encode(itemArray)
+            
+            try data.write(to: dataPath!)
+        }
+        catch
+        {
+            print("Error\(error)")
+        }
+         self.tableView.reloadData()
+    }
+    
+    
+    func loadItems(){ // load items from Items.plist ,ratherthan hardcoded details
+        
+        if let data = try? Data(contentsOf: dataPath!) {
+            let decoder = PropertyListDecoder()
+            do
+            {
+             itemArray = try decoder.decode([Item].self, from: data)
+                
+                print(itemArray)
+            }
+            catch
+            {
+                print("error\(error)")
+            }
+        }
+        
+        
+        
+    }
+    
 }
 
